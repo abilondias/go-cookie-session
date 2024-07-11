@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>go-cookie-session</title>
+  </head>
+  <body>
+    <form action="/login" id="login-form">
+      <p>
+        Username:
+        <input type="text" name="email" value="demo" />
+      </p>
+      <p>
+        Password:
+        <input type="password" name="password" value="demo" />
+      </p>
+      <p>
+        <button type="submit">Login</button>
+      </p>
+    </form>
+
+    <button onclick="getProtected()">Request protected resource</button>
+    <button onclick="refreshSession()">Refresh session</button>
+    <button onclick="clearCookies()">Clear all</button>
+    <button onclick="clearSession()">Clear Session cookie</button>
+    <button onclick="clearRefresh()">Clear Refresh cookie</button>
+
+    <hr />
+    <pre id="result"></pre>
+
+    <script>
+      const result = document.getElementById("result")
+
+      const displayResponse = async (response) => {
+        let text = `${response.status} ${await response.text()}`
+        response.headers.forEach((v, k) => {
+          text += `\n${k}: ${v}`
+        })
+        result.innerHTML = text
+      }
+
+      const loginForm = document.getElementById("login-form")
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault()
+
+        const email = loginForm.email.value
+        const password = loginForm.password.value
+
+        try {
+          const response = await fetch(loginForm.action, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          })
+          displayResponse(response)
+        } catch (error) {
+          console.error(error)
+          result.innerHTML = "Error: Failed to fetch"
+        }
+      })
+
+      const doRequest = async (method, path) => {
+        result.innerHTML = "Loading..."
+        try {
+          const response = await fetch(path, { method })
+          displayResponse(response)
+        } catch (error) {
+          console.error(error)
+          result.innerHTML = "Error: Failed to fetch"
+        }
+      }
+      const getProtected = async () => await doRequest("GET", "/protected")
+      const refreshSession = async () => await doRequest("POST", "/refresh")
+      const clearCookies = async () => await doRequest("GET", "/clear-cookies")
+      const clearSession = async () => await doRequest("GET", "/clear-session")
+      const clearRefresh = async () => await doRequest("GET", "/clear-refresh")
+    </script>
+  </body>
+</html>

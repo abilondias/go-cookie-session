@@ -1,0 +1,13 @@
+name: go-cookie-session
+
+services:
+  kvrocks:
+    image: "apache/kvrocks:2.9.0"
+    ports:
+      - "6666:6666"
+    volumes:
+      - kvrocks_data:/var/lib/kvrocks
+
+volumes:
+  kvrocks_data:
+    driver: local
